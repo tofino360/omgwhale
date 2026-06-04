@@ -1,2 +1,2 @@
 # omgwhale
-omgwhale.com
+Just a repo for a simple omgwhale.com page.
