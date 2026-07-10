@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Grid Generator</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #ffffff;
+    --line: #d8d8d8;
+    --accent: #2b6cb0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #f3f3f1;
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  .controls {
+    width: 100%;
+    max-width: 640px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+
+  .controls h1 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin: 0 0 16px;
+    color: #555;
+    text-transform: uppercase;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .slider-label {
+    font-weight: 700;
+    font-size: 18px;
+    width: 22px;
+    text-align: center;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--line);
+    border-radius: 3px;
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 3px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--line);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: 3px solid var(--paper);
+    box-shadow: 0 0 0 1px var(--line);
+  }
+
+  .ratio-readout {
+    text-align: center;
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 18px;
+  }
+
+  .ratio-readout strong {
+    color: var(--ink);
+  }
+
+  .buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  button {
+    flex: 1;
+    padding: 11px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    cursor: pointer;
+    background: var(--paper);
+    color: var(--ink);
+    transition: background 0.15s ease;
+  }
+
+  button:hover { background: #f6f6f6; }
+
+  button.primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  button.primary:hover { background: #245a93; }
+
+  .print-notice {
+    width: 100%;
+    max-width: 640px;
+    background: #fffbeb;
+    border: 1px solid #f0d080;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #6b5800;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* Grid sheet */
+  .sheet {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 48px 36px;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    row-gap: 28px;
+  }
+
+  .grid .cell {
+    text-align: center;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  @media (max-width: 480px) {
+    .grid .cell { font-size: 22px; }
+    .sheet { padding: 32px 16px; }
+  }
+
+  /* Print: only the sheet, nothing else */
+  @media print {
+    body {
+      background: white;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .controls {
+      display: none !important;
+    }
+    .print-notice {
+      display: none !important;
+    }
+    .sheet {
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      max-width: none;
+      width: 100%;
+    }
+    .grid {
+      row-gap: 28px;
+    }
+    .grid .cell {
+      font-size: 46px;
+      font-weight: 500;
+    }
+    @page {
+      margin: 0.85in;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="controls">
+    <h1>Grid Settings</h1>
+
+    <div class="slider-row">
+      <span class="slider-label">1</span>
+      <input type="range" id="ratioSlider" min="0" max="100" value="100" step="1">
+      <span class="slider-label">A</span>
+    </div>
+
+    <div class="ratio-readout">
+      <strong id="ratioText">100% letters</strong>
+    </div>
+
+    <div class="buttons">
+      <button id="generateBtn">Generate</button>
+      <button id="printBtn" class="primary">Print</button>
+    </div>
+  </div>
+
+  <div class="print-notice">
+    ⚠️ To suppress page headers &amp; footers: in the print dialog, set <strong>Headers and Footers</strong> to <strong>None</strong> (or uncheck them). This varies by browser — look under "More settings" in Chrome, or "Page Setup" in Firefox/Safari.
+  </div>
+
+  <div class="sheet">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <script>
+    const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const DIGITS = "0123456789".split("");
+    const GRID_SIZE = 10;
+
+    const slider = document.getElementById("ratioSlider");
+    const ratioText = document.getElementById("ratioText");
+    const grid = document.getElementById("grid");
+
+    function updateReadout() {
+      const letterPct = parseInt(slider.value, 10);
+      const digitPct = 100 - letterPct;
+      if (letterPct === 100) {
+        ratioText.textContent = "100% letters";
+      } else if (letterPct === 0) {
+        ratioText.textContent = "100% digits";
+      } else {
+        ratioText.textContent = letterPct + "% letters / " + digitPct + "% digits";
+      }
+    }
+
+    function randomChar(letterPct) {
+      const roll = Math.random() * 100;
+      if (roll < letterPct) {
+        return LETTERS[Math.floor(Math.random() * LETTERS.length)];
+      } else {
+        return DIGITS[Math.floor(Math.random() * DIGITS.length)];
+      }
+    }
+
+    function generateGrid() {
+      const letterPct = parseInt(slider.value, 10);
+      grid.innerHTML = "";
+      const total = GRID_SIZE * GRID_SIZE;
+      for (let i = 0; i < total; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.textContent = randomChar(letterPct);
+        grid.appendChild(cell);
+      }
+    }
+
+    slider.addEventListener("input", updateReadout);
+    document.getElementById("generateBtn").addEventListener("click", generateGrid);
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+    // Auto-generate on load at default 100% letters
+    updateReadout();
+    generateGrid();
+  </script>
+
+</body>
+</html>
